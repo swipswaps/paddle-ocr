@@ -1,0 +1,116 @@
+{
+  "project": "receipts-ocr",
+  "repository": "https://github.com/swipswaps/receipts-ocr",
+  "last_updated": "2025-12-07",
+  "summary": {
+    "total_issues": 35,
+    "fixed": 35,
+    "open": 0,
+    "known_limitations": 2,
+    "notes": [
+      "Database simplified from 'receipts' to 'scans'",
+      "Firewall lifecycle management added for LAN access"
+    ]
+  },
+  "issues": [
+    {
+      "id": 27,
+      "category": "frontend",
+      "title": "Backend Logs Not Streamed to Frontend During OCR",
+      "status": "FIXED",
+      "severity": "high",
+      "symptom": "Frontend shows no progress during 60-90s OCR. Backend logs exist but aren't visible.",
+      "fix": {
+        "action": "Implemented SSE log streaming with gunicorn threading support (threads=4) and LogBufferHandler in backend."
+      }
+    },
+    {
+      "id": 28,
+      "category": "backend",
+      "title": "Database 500 Error - init_database Not Called",
+      "status": "FIXED",
+      "severity": "critical",
+      "symptom": "Save to Database returns 500 error",
+      "fix": {
+        "action": "Added init_database() call at module level"
+      }
+    },
+    {
+      "id": 29,
+      "category": "backend",
+      "title": "Column Detection - Reading Rows Across Columns",
+      "status": "FIXED",
+      "severity": "high",
+      "symptom": "Text mixed across columns",
+      "fix": {
+        "action": "Implemented adaptive gap detection (median * 3)"
+      }
+    },
+    {
+      "id": 30,
+      "category": "frontend",
+      "title": "Modal Blue Screen / Field Mismatch",
+      "status": "FIXED",
+      "severity": "critical",
+      "symptom": "Clicking history items crashes component",
+      "fix": {
+        "action": "Fixed field name mismatch and string/number type coercion"
+      }
+    },
+    {
+      "id": 31,
+      "category": "deployment",
+      "title": "Network Access Blocked by Firewall",
+      "status": "FIXED",
+      "severity": "high",
+      "symptom": "App accessible on localhost but not LAN (Android devices)",
+      "fix": {
+        "action": "Added firewall detection in prestart.sh and management in start/stop scripts"
+      }
+    },
+    {
+      "id": 32,
+      "category": "frontend",
+      "title": "firewallCmd Undefined Crash",
+      "status": "FIXED",
+      "severity": "critical",
+      "symptom": "Clicking Network Help crashes app",
+      "fix": {
+        "action": "Defined correct firewall commands in DockerStatus"
+      }
+    },
+    {
+      "id": 33,
+      "category": "backend",
+      "title": "Incomplete Item Parsing",
+      "status": "FIXED",
+      "severity": "medium",
+      "symptom": "Only lines with prices were parsed",
+      "fix": {
+        "action": "Updated parsing logic to capture all text lines"
+      }
+    },
+    {
+      "id": 34,
+      "category": "database",
+      "title": "Database Schema Simplification",
+      "status": "FIXED",
+      "severity": "medium",
+      "symptom": "Schema too rigid for general docs",
+      "fix": {
+        "action": "Migrated to simple 'scans' table (id, filename, raw_text, created_at)"
+      }
+    },
+    {
+      "id": 35,
+      "category": "deployment",
+      "title": "Port/Firewall Lifecycle Management",
+      "status": "FIXED",
+      "severity": "high",
+      "symptom": "Ports left open, zombie processes",
+      "fix": {
+        "action": "Created start.sh/stop.sh for safe process and firewall rule management"
+      }
+    }
+  ]
+}

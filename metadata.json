@@ -1,0 +1,5 @@
+{
+  "name": "PaddleOCR App",
+  "description": "A production-ready, Android and Linux compatible document OCR application featuring PaddleOCR backend with column-first layout analysis, real-time backend log streaming, and simplified scan management.",
+  "requestFramePermissions": []
+}

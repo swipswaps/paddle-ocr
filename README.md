@@ -1,11 +1,31 @@
-<div align="center">
+# PaddleOCR App
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+A production-ready, Android and Linux compatible document OCR application.
 
-  <h1>Built with AI Studio</h2>
+## Features
+- **PaddleOCR Backend**: High accuracy, runs locally via Docker.
+- **Log Streaming**: Real-time visibility into backend processing (no spinners).
+- **Simplified Storage**: Save scans to local PostgreSQL database.
+- **LAN Access**: Automated firewall configuration for Android access.
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+## Quick Start
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+1. **Start Backend**
+   ```bash
+   docker compose up -d
+   ```
 
-</div>
+2. **Start Frontend (with network access)**
+   ```bash
+   ./scripts/start.sh
+   ```
+   Access at `http://localhost:5173` or your network IP (shown in terminal).
+
+## Architecture
+- **Backend**: Python/Flask + PaddleOCR + Gunicorn (threaded).
+- **Frontend**: React + TypeScript + Vite.
+- **Data**: PostgreSQL `scans` table.
+
+## Troubleshooting
+- **Logs not showing?** Ensure Docker container is running.
+- **Android can't connect?** Run `./scripts/start.sh` to auto-configure firewall.
