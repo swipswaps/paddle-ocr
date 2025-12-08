@@ -102,9 +102,8 @@ function App() {
   };
 
   const handleSaveScan = async () => {
-      // Use raw_text or text, falling back to empty string
-      // Note: 'text' is usually from the OCR response, 'raw_text' might be from DB objects or backup
-      const textToSave = ocrResult?.text || ocrResult?.raw_text || '';
+      // Use parsed, raw_text or text, falling back to empty string
+      const textToSave = ocrResult?.parsed || ocrResult?.text || ocrResult?.raw_text || '';
       
       if (file && textToSave) {
           try {
@@ -131,8 +130,8 @@ function App() {
     return new Date(ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
   };
 
-  // Safe accessor for display text - prioritize 'text' which is the standard OCR output
-  const displayText = ocrResult ? (ocrResult.text || ocrResult.raw_text || '') : '';
+  // Safe accessor for display text - prioritize 'parsed' then 'text' then 'raw_text'
+  const displayText = ocrResult ? (ocrResult.parsed || ocrResult.text || ocrResult.raw_text || '') : '';
 
   return (
     <div className="app-container">

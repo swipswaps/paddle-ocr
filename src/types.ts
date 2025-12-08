@@ -1,3 +1,4 @@
+
 export interface OcrBlock {
   text: string;
   box: number[];
@@ -5,9 +6,21 @@ export interface OcrBlock {
 }
 
 export interface OcrResponse {
-  text: string;
+  // Core fields from backend
+  success?: boolean;
+  filename?: string;
+  layout?: {
+    columns?: number;
+    rows?: number;
+    gap_size?: number;
+    [key: string]: any;
+  };
+  parsed?: string;
   raw_text?: string;
   blocks: OcrBlock[];
+  
+  // Legacy/Computed fields
+  text?: string; 
   column_count?: number;
   row_count?: number;
 }

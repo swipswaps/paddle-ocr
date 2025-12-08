@@ -25,9 +25,11 @@ export const ocrService = {
       const formData = new FormData();
       formData.append('file', file);
 
-      onLog?.('Sending to PaddleOCR backend...');
-      onLog?.('Waiting for PaddleOCR response (this may take 60-90s for large images)...');
-
+      // Log actual file details instead of a generic timer
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      onLog?.(`[SYSTEM] Uploading ${file.name} (${sizeMB} MB)...`, Date.now());
+      onLog?.('[SYSTEM] Handing off to PaddleOCR backend. Please wait for server logs...', Date.now());
+      
       const response = await fetch(`${API_BASE}/ocr`, {
         method: 'POST',
         body: formData,
@@ -39,9 +41,37 @@ export const ocrService = {
 
       const data: OcrResponse = await response.json();
       
-      const cols = data.column_count || 1;
-      const rows = data.row_count || data.blocks.length;
-      onLog?.(`OCR complete: ${data.blocks.length} text blocks, ${cols} columns, ${rows} rows detected`);
+      // Detailed response logging based on user request
+      onLog?.('--- OCR Result Details ---', Date.now());
+      onLog?.(`Success: ${data.success ? 'True' : 'False'}`, Date.now());
+      
+      if (data.filename) onLog?.(`Filename: ${data.filename}`, Date.now());
+      
+      if (data.layout) {
+        const layoutStr = JSON.stringify(data.layout, null, 0)
+          .replace(/["{}]/g, '')
+          .replace(/,/g, ', ');
+        onLog?.(`Layout Analysis: ${layoutStr}`, Date.now());
+      } else {
+        // Fallback for older backend versions
+        const cols = data.column_count || 1;
+        const rows = data.row_count || (data.blocks ? data.blocks.length : 0);
+        onLog?.(`Layout Analysis: ${cols} columns, ${rows} rows`, Date.now());
+      }
+
+      if (data.blocks) {
+        onLog?.(`Text Blocks Detected: ${data.blocks.length}`, Date.now());
+      }
+
+      if (data.parsed) {
+        onLog?.(`Parsed Text: ${data.parsed.length} characters`, Date.now());
+      }
+      
+      if (data.raw_text && (!data.parsed || data.parsed.length !== data.raw_text.length)) {
+        onLog?.(`Raw Text: ${data.raw_text.length} characters`, Date.now());
+      }
+      
+      onLog?.('--------------------------', Date.now());
 
       return data;
     } finally {
@@ -58,9 +88,15 @@ export const ocrService = {
       const data = await res.json();
       
       // Handle { scans: [...] } format or direct array
-      const list = Array.isArray(data) ? data : (Array.isArray(data.scans) ? data.scans : []);
+      if (data && Array.isArray(data.scans)) {
+          return data.scans;
+      }
+      if (Array.isArray(data)) {
+          return data;
+      }
       
-      return list;
+      console.warn('Unexpected scan list format:', data);
+      return [];
     } catch (error) {
       console.error('Error listing scans:', error);
       return []; // Return empty array on failure to prevent frontend crashes

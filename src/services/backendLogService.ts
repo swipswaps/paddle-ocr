@@ -26,14 +26,20 @@ export const backendLogService = {
                 data.content || 
                 data.stdout || 
                 data.stderr || 
+                data.status ||
+                data.error ||
                 '';
           
-          // If we have a 'level' (e.g. INFO, WARN), prepend it to match standard logs
-          if (data.level && msg) {
-             msg = `[${data.level}] ${msg}`;
+          // Capture Python logging levels (DEBUG, INFO, ERROR)
+          const level = data.level || data.levelname || '';
+
+          // Prepend level if it exists and isn't already in the message
+          if (level && msg && !msg.startsWith('[')) {
+             msg = `[${level.toUpperCase()}] ${msg}`;
           }
 
           // If msg is still empty/undefined but we have an object, stringify it
+          // This ensures we see *something* even if the schema is unexpected
           if (!msg && Object.keys(data).length > 0) {
             msg = JSON.stringify(data);
           }
@@ -49,6 +55,7 @@ export const backendLogService = {
         }
       } catch (e) {
         // If JSON parse fails, treat the raw data as the message if it's not whitespace
+        // This catches raw stdout/stderr lines sent by the backend
         if (event.data.trim()) {
            onLog({
              ts: Date.now() / 1000,
