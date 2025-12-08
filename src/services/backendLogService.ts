@@ -3,7 +3,14 @@ import { BackendLogEntry } from '../types';
 
 export const backendLogService = {
   startStreaming(onLog: (entry: BackendLogEntry) => void): () => void {
+    // Announce connection attempt
+    onLog({ ts: Date.now() / 1000, msg: '[SYSTEM] Initiating log stream connection...' });
+
     const eventSource = new EventSource(`${API_BASE}/logs/stream`);
+    
+    eventSource.onopen = () => {
+      onLog({ ts: Date.now() / 1000, msg: '[SYSTEM] Log stream connected. Listening for server output...' });
+    };
     
     eventSource.onmessage = (event) => {
       // Skip empty events
@@ -56,21 +63,35 @@ export const backendLogService = {
       } catch (e) {
         // If JSON parse fails, treat the raw data as the message if it's not whitespace
         // This catches raw stdout/stderr lines sent by the backend
-        if (event.data.trim()) {
+        if (event.data && event.data.trim()) {
            onLog({
              ts: Date.now() / 1000,
-             msg: event.data
+             msg: `[RAW] ${event.data}`
            });
         }
       }
     };
 
-    eventSource.onerror = () => {
-      // Quietly close on error to avoid spamming connection retries if server goes down
-      eventSource.close();
+    eventSource.onerror = (e) => {
+      // Analyze error state
+      let stateMsg = 'Unknown Error';
+      if (eventSource.readyState === EventSource.CONNECTING) {
+        stateMsg = 'Connection lost, attempting to reconnect...';
+      } else if (eventSource.readyState === EventSource.CLOSED) {
+        stateMsg = 'Connection closed.';
+      }
+
+      onLog({ 
+        ts: Date.now() / 1000, 
+        msg: `[SYSTEM] Log stream warning: ${stateMsg}` 
+      });
+
+      // We do NOT close() here; let EventSource retry logic handle intermittent drops.
+      // If it's a permanent 404/500, the browser will eventually stop or we rely on the parent to cleanup.
     };
 
     return () => {
+      onLog({ ts: Date.now() / 1000, msg: '[SYSTEM] Closing log stream.' });
       eventSource.close();
     };
   }

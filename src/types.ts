@@ -36,3 +36,10 @@ export interface BackendLogEntry {
   ts: number;
   msg: string;
 }
+
+export interface HealthStats {
+  status: 'online' | 'offline';
+  cpu_percent?: number;
+  memory_used?: number; // MB
+  memory_total?: number; // MB
+}

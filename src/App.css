@@ -177,6 +177,8 @@ h1 {
 .log-entry.system .log-msg { color: #85c4ff; }
 .log-entry.ocr .log-msg { color: #87ffaf; }
 .log-entry.error .log-msg { color: #ff8585; }
+.log-entry.wait .log-msg { color: #888888; font-style: italic; }
+.log-entry.raw .log-msg { color: #dddddd; font-family: 'Courier New', monospace; border-left: 2px solid #555; padding-left: 8px; }
 
 /* Results Section */
 .results-section {
@@ -190,6 +192,31 @@ h1 {
   margin-bottom: 12px;
 }
 
+.view-toggles {
+  display: flex;
+  background: #f0f0f0;
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.toggle-btn {
+  padding: 4px 12px;
+  border: none;
+  background: transparent;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border-radius: 4px;
+  color: #666;
+}
+
+.toggle-btn.active {
+  background: white;
+  color: #007bff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  font-weight: 500;
+}
+
 .ocr-output {
   width: 100%;
   padding: 16px;
@@ -201,6 +228,12 @@ h1 {
   resize: vertical;
   background: #fff;
   box-sizing: border-box;
+}
+
+.ocr-output.json {
+  font-size: 13px;
+  color: #333;
+  background: #fafafa;
 }
 
 /* History Section */
@@ -325,7 +358,7 @@ h1 {
   font-size: 14px;
 }
 
-/* Status Indicator */
+/* Status Indicator & Stats */
 .status-indicator {
   display: flex;
   align-items: center;
@@ -359,4 +392,53 @@ h1 {
 
 .status-indicator.disconnected .status-dot {
   background: #dc3545;
+}
+
+/* Resource Stats */
+.resource-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 12px;
+  border-left: 1px solid #ccc;
+  margin-left: 8px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stat-separator {
+  border-left: 1px solid #e0e0e0;
+  padding-left: 12px;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #666;
+}
+
+.stat-bar-bg {
+  width: 50px;
+  height: 6px;
+  background: #ddd;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.stat-bar-fill {
+  height: 100%;
+  background: #28a745;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.stat-value {
+  font-size: 0.75rem;
+  min-width: 35px;
+  text-align: right;
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
 }
