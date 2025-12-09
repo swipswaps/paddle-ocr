@@ -33,16 +33,20 @@ function App() {
   const refreshScans = useCallback(async () => {
     try {
       const data = await ocrService.listScans();
-      setScans(data);
+      // Ensure data is an array before setting state
+      setScans(Array.isArray(data) ? data : []);
     } catch (e) {
-      console.error(e);
+      console.error('Failed to load scans', e);
+      setScans([]);
     }
   }, []);
 
+  // Initial load
   useEffect(() => {
     refreshScans();
   }, [refreshScans]);
 
+  // Auto-scroll logs
   useEffect(() => {
     if (logsEndRef.current) {
       logsEndRef.current.scrollIntoView({ behavior: 'auto' });
@@ -51,6 +55,13 @@ function App() {
 
   const addLog = (message: string, type: 'system' | 'ocr' | 'error' | 'wait' | 'raw' = 'system', timestamp: number = Date.now()) => {
     setLogs(prev => [...prev, { type, message, timestamp }]);
+  };
+
+  const handleTabChange = (tab: 'upload' | 'history') => {
+    setActiveTab(tab);
+    if (tab === 'history') {
+      refreshScans();
+    }
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,6 +134,7 @@ function App() {
       setOcrResult(result);
       if (result.success) {
         addLog('OCR Processing Complete', 'system');
+        // Refresh scans list silently so history is ready
         refreshScans();
       } else {
         addLog('OCR completed but marked as unsuccessful', 'error');
@@ -167,13 +179,13 @@ function App() {
       <div className="tabs">
         <button 
           className={activeTab === 'upload' ? 'active' : ''} 
-          onClick={() => setActiveTab('upload')}
+          onClick={() => handleTabChange('upload')}
         >
           New Scan
         </button>
         <button 
           className={activeTab === 'history' ? 'active' : ''} 
-          onClick={() => setActiveTab('history')}
+          onClick={() => handleTabChange('history')}
         >
           History ({scans.length})
         </button>
@@ -267,8 +279,8 @@ function App() {
                 {scans.map(scan => (
                     <div key={scan.id} className="scan-card" onClick={() => handleHistoryClick(scan)}>
                         <h4>{scan.filename}</h4>
-                        <p>{new Date(scan.created_at).toLocaleDateString()}</p>
-                        <p>{scan.raw_text.substring(0, 50)}...</p>
+                        <p>{scan.created_at ? new Date(scan.created_at).toLocaleDateString() : 'Unknown Date'}</p>
+                        <p>{(scan.raw_text || '').substring(0, 50)}...</p>
                     </div>
                 ))}
                 {scans.length === 0 && <p>No scans saved yet.</p>}
